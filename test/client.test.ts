@@ -46,6 +46,44 @@ describe("Traky", () => {
     expect(userAgent).toMatch(/^@traky-app\/sdk\//);
   });
 
+  it("solo llama organización, todos los paquetes y paquetes de Misiil", async () => {
+    const paths: string[] = [];
+    const client = new Traky({
+      apiKey: "trk_test",
+      fetch: async (input) => {
+        const request = new Request(input);
+        paths.push(`${request.method} ${new URL(request.url).pathname}`);
+        return jsonResponse({
+          data: [],
+          total: 0,
+          exportedAt: "2026-10-24T00:00:00.000Z",
+          source: "misiil",
+        });
+      },
+    });
+
+    expect(Object.keys(client).sort()).toEqual(["organization", "packages"]);
+    expect(
+      Object.getOwnPropertyNames(Object.getPrototypeOf(client.organization))
+        .filter((name) => name !== "constructor")
+        .sort(),
+    ).toEqual(["retrieve"]);
+    expect(
+      Object.getOwnPropertyNames(Object.getPrototypeOf(client.packages))
+        .filter((name) => name !== "constructor")
+        .sort(),
+    ).toEqual(["list", "listFromMisiil"]);
+
+    await client.organization.retrieve();
+    await client.packages.list();
+    await client.packages.listFromMisiil();
+    expect(paths.sort()).toEqual([
+      "GET /org-api/v1/marketplaces/misiil/packages",
+      "GET /org-api/v1/organization",
+      "GET /org-api/v1/packages",
+    ]);
+  });
+
   it("exporta paquetes y paquetes de Misiil", async () => {
     const paths: string[] = [];
     const client = new Traky({
@@ -53,7 +91,7 @@ describe("Traky", () => {
       fetch: async (input) => {
         const request = new Request(input);
         paths.push(new URL(request.url).pathname);
-        if (request.url.endsWith("/bots/misiil/packages")) {
+        if (request.url.endsWith("/marketplaces/misiil/packages")) {
           return jsonResponse({
             data: [],
             total: 0,
@@ -73,7 +111,7 @@ describe("Traky", () => {
     const misiil = await client.packages.listFromMisiil();
     expect(paths).toEqual([
       "/org-api/v1/packages",
-      "/org-api/v1/bots/misiil/packages",
+      "/org-api/v1/marketplaces/misiil/packages",
     ]);
     expect(misiil.source).toBe("misiil");
   });

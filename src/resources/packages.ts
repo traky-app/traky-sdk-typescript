@@ -13,12 +13,12 @@ export class PackagesResource {
   }
 
   /**
-   * Solo paquetes creados por Bot Misiil.
+   * Paquetes del marketplace Misiil.
    * Requiere scope `packages:read`.
    */
   listFromMisiil(signal?: AbortSignal): Promise<MisiilPackageExport> {
     return this.http.get<MisiilPackageExport>(
-      "/org-api/v1/bots/misiil/packages",
+      "/org-api/v1/marketplaces/misiil/packages",
       undefined,
       signal,
     );

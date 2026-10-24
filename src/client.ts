@@ -15,11 +15,11 @@ export class Traky {
   readonly organization: OrganizationResource;
   readonly packages: PackagesResource;
 
-  private readonly http: TrakyHttp;
+  readonly #http: TrakyHttp;
 
   constructor(options: TrakyClientOptions) {
-    this.http = new TrakyHttp(options);
-    this.organization = new OrganizationResource(this.http);
-    this.packages = new PackagesResource(this.http);
+    this.#http = new TrakyHttp(options);
+    this.organization = new OrganizationResource(this.#http);
+    this.packages = new PackagesResource(this.#http);
   }
 }

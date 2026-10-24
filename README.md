@@ -6,8 +6,14 @@ Requiere Node.js 20 o superior. No tiene dependencias de runtime: usa `fetch`.
 
 ## Instalación
 
+npm o pnpm instalan el mismo paquete público: https://www.npmjs.com/package/@traky-app/sdk
+
 ```bash
 npm install @traky-app/sdk
+```
+
+```bash
+pnpm add @traky-app/sdk
 ```
 
 ## Uso
@@ -30,7 +36,7 @@ const misiil = await traky.packages.listFromMisiil();
 | --- | --- | --- |
 | `organization.retrieve()` | `GET /org-api/v1/organization` | `organization:read` |
 | `packages.list()` | `GET /org-api/v1/packages` | `packages:read` |
-| `packages.listFromMisiil()` | `GET /org-api/v1/bots/misiil/packages` | `packages:read` |
+| `packages.listFromMisiil()` | `GET /org-api/v1/marketplaces/misiil/packages` | `packages:read` |
 
 `packages.list()` devuelve hasta 500 paquetes, los más recientes. La API también acepta la key en el header `X-Api-Key`; este SDK envía `Authorization: Bearer`.
 
