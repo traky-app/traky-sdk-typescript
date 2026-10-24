@@ -1,8 +1,8 @@
 name: Publish to npm
 
 on:
-  push:
-    branches: [main]
+  release:
+    types: [published]
 
 jobs:
   publish:
@@ -11,8 +11,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Checkout
+      - name: Checkout release
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -29,11 +31,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check published version
+      - name: Check release version
         id: published
         run: |
+          tag="${{ github.event.release.tag_name }}"
+          release="${tag#v}"
           version="$(node -p "JSON.parse(require('node:fs').readFileSync('package.json','utf8')).version")"
+          sdk="$(node -p "const fs=require('node:fs'); const src=fs.readFileSync('src/version.ts','utf8'); const match=src.match(/SDK_VERSION = \"([^\"]+)\"/); if (!match) process.exit(1); match[1]")"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "$release" != "$version" ]; then
+            echo "El tag $tag es distinto de package.json ($version)."
+            exit 1
+          fi
+          if [ "$sdk" != "$version" ]; then
+            echo "src/version.ts ($sdk) es distinto de package.json ($version)."
+            exit 1
+          fi
           if npm view "@traky-app/sdk@$version" version >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else

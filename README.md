@@ -72,7 +72,9 @@ Para añadir un recurso, crea una clase en `src/resources/` y cuélgala de `Trak
 
 ## Publicar
 
-El paquete es público: `@traky-app/sdk`. Cada push a `main` lo publica en el registro de npm con un trusted publisher. `npm install` y `pnpm add` usan ese mismo registro. No hace falta un token ni un environment.
+El paquete es público: `@traky-app/sdk`. Se publica en npm cuando se publica un release de GitHub. `npm install` y `pnpm add` usan ese mismo registro. No hace falta un token ni un environment.
+
+Antes del release, deja la misma versión en `package.json` y en `src/version.ts`. El tag tiene que ser esa versión con `v` delante (`v1.2.0` para `1.2.0`). Al publicar el release, el workflow hace checkout de ese tag, comprueba que coincida y sube el paquete si esa versión aún no está en npm. Un borrador no publica.
 
 En npm, la organización `@traky-app` tiene que existir y el workflow tiene que estar autorizado:
 
@@ -80,4 +82,4 @@ En npm, la organización `@traky-app` tiene que existir y el workflow tiene que 
 - Workflow: `publish.yml`
 - Environment: vacío
 
-Si la versión de `package.json` ya está publicada, el workflow no vuelve a subirla. Para una versión nueva, sube el número en `package.json` y en `src/version.ts` antes del push. `prepublishOnly` corre typecheck, tests y build antes del tarball.
+`prepublishOnly` corre typecheck, tests y build antes del tarball.
