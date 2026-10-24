@@ -1,9 +1,8 @@
 name: Publish to npm
 
 on:
-  workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    branches: [main]
 
 jobs:
   publish:
@@ -30,7 +29,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check published version
+        id: published
+        run: |
+          version="$(node -p "JSON.parse(require('node:fs').readFileSync('package.json','utf8')).version")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if npm view "@traky-app/sdk@$version" version >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish
+        if: steps.published.outputs.exists == 'false'
         run: pnpm publish --access public --no-git-checks
         env:
           NPM_CONFIG_PROVENANCE: "true"
