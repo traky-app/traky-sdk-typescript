@@ -1,4 +1,4 @@
-# @traky/sdk
+# @traky-app/sdk
 
 SDK de Node.js para la [API de organización de Traky](https://api.traky.app). Autentica con una API key (`trk_…`) y llama a `/org-api/v1`.
 
@@ -7,7 +7,7 @@ Requiere Node.js 20 o superior. No tiene dependencias de runtime: usa `fetch`.
 ## Instalación
 
 ```bash
-npm install @traky/sdk
+npm install @traky-app/sdk
 ```
 
 ## Uso
@@ -15,7 +15,7 @@ npm install @traky/sdk
 Crea la API key en Traky (ajustes de desarrollador de la empresa) y guárdala en `TRAKY_API_KEY`.
 
 ```ts
-import { Traky } from "@traky/sdk";
+import { Traky } from "@traky-app/sdk";
 
 const traky = new Traky({
   apiKey: process.env.TRAKY_API_KEY!,
@@ -46,7 +46,7 @@ const traky = new Traky({
 ### Errores
 
 ```ts
-import { Traky, TrakyApiError } from "@traky/sdk";
+import { Traky, TrakyApiError } from "@traky-app/sdk";
 
 try {
   await traky.organization.retrieve();
@@ -72,7 +72,7 @@ Para añadir un recurso, crea una clase en `src/resources/` y cuélgala de `Trak
 
 ## Publicar
 
-El paquete es público bajo el scope `@traky`. La primera vez hay que crear la organización en npm y iniciar sesión.
+El paquete es público bajo el scope `@traky-app`. La primera vez hay que crear la organización en npm y iniciar sesión.
 
 ```bash
 npm login

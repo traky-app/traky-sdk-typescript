@@ -1,7 +1,7 @@
 {
-  "name": "@traky/sdk",
-  "version": "0.1.0",
-  "description": "SDK oficial de Node.js para la API de organización de Traky.",
+  "name": "@traky-app/sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript SDK for the Traky logistics API",
   "keywords": [
     "traky",
     "sdk",

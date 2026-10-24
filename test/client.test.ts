@@ -43,7 +43,7 @@ describe("Traky", () => {
     await expect(client.organization.retrieve()).resolves.toEqual(organization);
     expect(url).toBe("https://api.traky.app/org-api/v1/organization");
     expect(authorization).toBe("Bearer trk_test");
-    expect(userAgent).toMatch(/^traky-node\//);
+    expect(userAgent).toMatch(/^@traky-app\/sdk\//);
   });
 
   it("exporta paquetes y paquetes de Misiil", async () => {
