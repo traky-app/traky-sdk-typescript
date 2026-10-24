@@ -12,13 +12,13 @@
   ],
   "license": "MIT",
   "author": "FasteryDev LLC (https://fastery.dev)",
-  "homepage": "https://github.com/traky-app/traky-sdk-node#readme",
+  "homepage": "https://github.com/traky-app/traky-sdk-typescript#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/traky-app/traky-sdk-node.git"
+    "url": "git+https://github.com/traky-app/traky-sdk-typescript.git"
   },
   "bugs": {
-    "url": "https://github.com/traky-app/traky-sdk-node/issues"
+    "url": "https://github.com/traky-app/traky-sdk-typescript/issues"
   },
   "type": "module",
   "main": "./dist/index.cjs",

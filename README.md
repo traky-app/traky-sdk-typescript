@@ -72,11 +72,11 @@ Para añadir un recurso, crea una clase en `src/resources/` y cuélgala de `Trak
 
 ## Publicar
 
-El paquete es público bajo el scope `@traky-app`. La primera vez hay que crear la organización en npm y iniciar sesión.
+El paquete es público: `@traky-app/sdk`. GitHub Actions lo publica en npm con un trusted publisher. No hace falta un token en el repositorio.
 
-```bash
-npm login
-pnpm publish
-```
+En npm, la organización `@traky-app` tiene que existir y el workflow tiene que estar autorizado:
 
-`prepublishOnly` corre typecheck, tests y build antes de subir el tarball.
+- Repositorio: `traky-app/traky-sdk-typescript`
+- Workflow: `publish.yml`
+
+Después, en GitHub: Actions → **Publish to npm** → **Run workflow**. También se publica al crear un release. `prepublishOnly` corre typecheck, tests y build antes de subir el tarball.
