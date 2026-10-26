@@ -21,7 +21,11 @@ pnpm add @traky-app/sdk
 Crea la API key en Traky (ajustes de desarrollador de la empresa) y guárdala en `TRAKY_API_KEY`.
 
 ```ts
-import { Traky } from "@traky-app/sdk";
+import {
+  Traky,
+  type ContactWrite,
+  type CustomerCreate,
+} from "@traky-app/sdk";
 
 const traky = new Traky({
   apiKey: process.env.TRAKY_API_KEY!,
@@ -31,20 +35,26 @@ const organization = await traky.organization.retrieve();
 const packages = await traky.packages.list();
 const misiil = await traky.packages.listFromMisiil();
 
-const customers = await traky.customers.list({ page: 1, types: ["CLIENT"] });
-const customer = await traky.customers.create({
+const customerBody: CustomerCreate = {
+  accountType: "PERSONAL",
   firstName: "Ana",
   email: "ana@example.com",
-});
+  createContact: false,
+};
+const customer = await traky.customers.create(customerBody);
 await traky.customers.update(customer.id, { lastName: "Paz" });
 
-const contact = await traky.contacts.create({
+const contactBody: ContactWrite = {
   firstName: "Luis",
   types: ["SHIPPER"],
   clientId: customer.id,
-});
+};
+const contact = await traky.contacts.create(contactBody);
+await traky.contacts.update(contact.id, { types: ["SHIPPER", "CONSIGNEE"] });
 await traky.contacts.delete(contact.id);
 ```
+
+El ejemplo que crea y borra un cliente y un contacto está en `examples/directory.ts`. El de paquetes, en `examples/list-packages.ts`. Al pasar el cursor sobre `create`, `update`, `list`, `retrieve` o `delete` el editor muestra el cuerpo que hay que enviar.
 
 | Método | Endpoint | Scope |
 | --- | --- | --- |
@@ -58,7 +68,7 @@ await traky.contacts.delete(contact.id);
 
 `packages.list()` devuelve hasta 500 paquetes, los más recientes. Cada paquete trae `packageType` (`WR`), `receiptNumber` y `packageNumber`. En Misiil el recibo es el warehouse (`WHR…`) y el código de paquete es ese recibo más `P1`. `packages.listFromMisiil()` devuelve solo los paquetes ligados a Misiil y agrega `source: "misiil"`. La nota de bodega va en `warehouseComments` y la descripción en `comments`.
 
-`customers` es el cliente con portal. `contacts` es el contacto comercial (remitente, consignatario, etc.) y puede vincularse con `clientId`. Una cuenta personal pide `firstName`; una cuenta `BUSINESS` pide `companyName`. Las claves ya creadas con `organization:read` pueden usar este CRUD. La respuesta no incluye el id de autenticación ni la contraseña del portal.
+`customers.create` recibe `CustomerCreate`. Cuenta `PERSONAL` pide `firstName` y cuenta `BUSINESS` pide `companyName`. No se envía `types`; el API lo guarda como `CLIENT`. `createContact: true` (o ausente) crea además un contacto `SHIPPER` con los mismos datos; `false` crea solo el cliente. `customers.update` recibe `CustomerWrite`. `contacts` es el contacto comercial y el cuerpo es `ContactWrite`. Su `types` sale de `CONTACT_TYPES` (`SHIPPER`, `CONSIGNEE`, `CARRIER`, `FORWARDER`, `NOTIFY_PARTY`, `BROKER`, `IMPORTER`, `EXPORTER`, `AGENT`, `WAREHOUSE`). Si no se envía, queda `SHIPPER`. `clientId` lo vincula al cliente. Las claves ya creadas con `organization:read` pueden usar este CRUD. La respuesta no incluye el id de autenticación ni la contraseña del portal.
 
 La API también acepta la key en el header `X-Api-Key`; este SDK envía `Authorization: Bearer`.
 

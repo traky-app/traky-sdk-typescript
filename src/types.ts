@@ -84,23 +84,49 @@ export type MisiilPackageExport = PackageExport & {
   source: "misiil";
 };
 
-export type AccountType = "PERSONAL" | "BUSINESS";
+/** Tipo de cuenta. Personal exige `firstName`. Empresa exige `companyName`. */
+export const ACCOUNT_TYPES = ["PERSONAL", "BUSINESS"] as const;
 
-export type CustomerType =
-  | "CLIENT"
-  | "SHIPPER"
-  | "CONSIGNEE"
-  | "CARRIER"
-  | "FORWARDER"
-  | "NOTIFY_PARTY"
-  | "BROKER"
-  | "IMPORTER"
-  | "EXPORTER"
-  | "AGENT"
-  | "WAREHOUSE";
+export type AccountType = (typeof ACCOUNT_TYPES)[number];
 
-/** Roles de un contacto. Un contacto no es cliente de portal. */
-export type ContactType = Exclude<CustomerType, "CLIENT">;
+/**
+ * Roles de directorio. En un cliente el API solo persiste `CLIENT`.
+ * El resto se envía en `types` del contacto.
+ */
+export const CUSTOMER_TYPES = [
+  "CLIENT",
+  "SHIPPER",
+  "CONSIGNEE",
+  "CARRIER",
+  "FORWARDER",
+  "NOTIFY_PARTY",
+  "BROKER",
+  "IMPORTER",
+  "EXPORTER",
+  "AGENT",
+  "WAREHOUSE",
+] as const;
+
+export type CustomerType = (typeof CUSTOMER_TYPES)[number];
+
+/**
+ * Roles que se envían en `types` de un contacto.
+ * Los mismos que el cliente, sin `CLIENT`: un contacto no tiene portal.
+ */
+export const CONTACT_TYPES = [
+  "SHIPPER",
+  "CONSIGNEE",
+  "CARRIER",
+  "FORWARDER",
+  "NOTIFY_PARTY",
+  "BROKER",
+  "IMPORTER",
+  "EXPORTER",
+  "AGENT",
+  "WAREHOUSE",
+] as const;
+
+export type ContactType = (typeof CONTACT_TYPES)[number];
 
 export type DirectoryEmail = {
   label?: string;
@@ -143,7 +169,7 @@ export type DeletedResource = {
  */
 export type Customer = {
   id: string;
-  accountType: AccountType | string | null;
+  accountType: AccountType | null;
   companyName: string | null;
   firstName: string | null;
   lastName: string | null;
@@ -163,12 +189,18 @@ export type Customer = {
   mailbox: string | null;
   enterpriseCode: string | null;
   isActive: boolean;
-  types: string[];
+  /** Siempre `CLIENT`. Los roles operativos se envían en el contacto. */
+  types: ["CLIENT"];
   tags: DirectoryTag[];
   createdAt: string | null;
   updatedAt: string | null;
 };
 
+/**
+ * Cuerpo de `customers.create` y `customers.update`.
+ * No incluye `types`: el API guarda siempre `CLIENT`.
+ * El rol operativo (`SHIPPER`, `CONSIGNEE`, …) se envía en `contacts`.
+ */
 export type CustomerWrite = {
   accountType?: AccountType;
   companyName?: string;
@@ -190,7 +222,18 @@ export type CustomerWrite = {
   emails?: DirectoryEmail[];
   phones?: DirectoryPhone[];
   tagIds?: string[];
-  types?: CustomerType[];
+};
+
+/**
+ * Cuerpo de `customers.create`.
+ * `createContact` decide si el API también crea el contacto SHIPPER.
+ */
+export type CustomerCreate = CustomerWrite & {
+  /**
+   * `true` o ausente: crea un contacto `SHIPPER` con los mismos datos del cliente.
+   * `false`: crea solo el cliente.
+   */
+  createContact?: boolean;
 };
 
 export type CustomerListParams = {
@@ -210,7 +253,7 @@ export type CustomerListParams = {
  */
 export type Contact = {
   id: string;
-  accountType: AccountType | string | null;
+  accountType: AccountType | null;
   companyName: string | null;
   firstName: string | null;
   lastName: string | null;
@@ -227,7 +270,8 @@ export type Contact = {
   postalCode: string | null;
   note: string | null;
   isActive: boolean;
-  types: string[];
+  /** Roles del contacto. Valores de `CONTACT_TYPES`. Nunca `CLIENT`. */
+  types: ContactType[];
   clientId: string | null;
   client: {
     id: string;
@@ -241,6 +285,7 @@ export type Contact = {
   updatedAt: string | null;
 };
 
+/** Cuerpo de `contacts.create` y `contacts.update`. */
 export type ContactWrite = {
   accountType?: AccountType;
   companyName?: string;
@@ -259,6 +304,11 @@ export type ContactWrite = {
   isActive?: boolean;
   emails?: DirectoryEmail[];
   phones?: DirectoryPhone[];
+  /**
+   * Roles a guardar. Si no se envía, el API deja `SHIPPER`.
+   * Valores: `SHIPPER`, `CONSIGNEE`, `CARRIER`, `FORWARDER`, `NOTIFY_PARTY`,
+   * `BROKER`, `IMPORTER`, `EXPORTER`, `AGENT`, `WAREHOUSE`.
+   */
   types?: ContactType[];
   /** Cliente al que vincular. `null` en un update lo desvincula. */
   clientId?: string | null;

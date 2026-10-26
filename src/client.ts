@@ -14,13 +14,20 @@ import type { TrakyClientOptions } from "./types.js";
  * ```
  */
 export class Traky {
+  /** Organización dueña de la API key. */
   readonly organization: OrganizationResource;
+  /** Exportación de paquetes y de paquetes de Misiil. */
   readonly packages: PackagesResource;
+  /** Clientes con portal. El alta usa `CustomerCreate` (`createContact`). */
   readonly customers: CustomersResource;
+  /** Contactos comerciales. El rol se envía en `ContactWrite.types`. */
   readonly contacts: ContactsResource;
 
   readonly #http: TrakyHttp;
 
+  /**
+   * @param options - `apiKey` con prefijo `trk_`. `baseUrl` solo si no es producción.
+   */
   constructor(options: TrakyClientOptions) {
     this.#http = new TrakyHttp(options);
     this.organization = new OrganizationResource(this.#http);
