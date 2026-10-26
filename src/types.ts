@@ -9,26 +9,55 @@ export type Organization = {
   organizationId: string | null;
 };
 
+/** Prefijo interno del recibo. Hoy el único tipo es WR. */
+export type PackageType = "WR";
+
+export type PackageParty = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  companyName: string | null;
+};
+
+export type PackageStatus = {
+  id: string;
+  name: string;
+};
+
+export type PackageOffice = {
+  id: string;
+  name: string;
+};
+
 /**
  * Paquete exportado por la Org API.
- * La API devuelve el registro completo (sin metadatos internos de IA).
- * Este tipo cubre los campos estables; el resto llega en la respuesta JSON.
+ * Incluye el código de recibo y el código de paquete (WR del sistema o WHR de Misiil).
+ * No trae la nota de administración ni los metadatos internos de IA.
  */
 export type Package = {
   id: string;
-  packageType: string;
+  packageType: PackageType;
   serialNumber: number | null;
   receiptPackageIndex: number;
+  /** Código de recibo: secuencia WR o warehouse externo (WHR…). */
+  receiptNumber: string | null;
+  /** Código de paquete: recibo + P1, P2… */
+  packageNumber: string | null;
   trackingNumber: string | null;
+  trackingNormalized: string | null;
   weight: number;
+  weightUnit: string | null;
+  volumetricWeight: number;
+  chargeableWeight: number;
   declaredValue: number;
   height: number;
   width: number;
   length: number;
+  dimensionUnit: string | null;
   pieces: number;
-  volumetricWeight: number;
-  chargeableWeight: number;
-  comments: string;
+  /** Descripción de la mercancía. */
+  comments: string | null;
+  /** Nota de bodega. En Misiil es la columna Nota. */
   warehouseComments: string | null;
   isConsolidated: boolean;
   isGrouped: boolean;
@@ -38,6 +67,11 @@ export type Package = {
   registrationDate: string;
   createdAt: string;
   updatedAt: string;
+  itemStatus: PackageStatus | null;
+  customer: PackageParty | null;
+  shipper: PackageParty | null;
+  location: PackageOffice | null;
+  warehouse: PackageOffice | null;
 };
 
 export type PackageExport = {

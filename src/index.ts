@@ -7,5 +7,9 @@ export type {
   Organization,
   Package,
   PackageExport,
+  PackageOffice,
+  PackageParty,
+  PackageStatus,
+  PackageType,
   TrakyClientOptions,
 } from "./types.js";

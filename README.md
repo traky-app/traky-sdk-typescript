@@ -38,7 +38,9 @@ const misiil = await traky.packages.listFromMisiil();
 | `packages.list()` | `GET /org-api/v1/packages` | `packages:read` |
 | `packages.listFromMisiil()` | `GET /org-api/v1/marketplaces/misiil/packages` | `packages:read` |
 
-`packages.list()` devuelve hasta 500 paquetes, los más recientes. La API también acepta la key en el header `X-Api-Key`; este SDK envía `Authorization: Bearer`.
+`packages.list()` devuelve hasta 500 paquetes, los más recientes. Cada paquete trae `packageType` (`WR`), `receiptNumber` y `packageNumber`. En Misiil el recibo es el warehouse (`WHR…`) y el código de paquete es ese recibo más `P1`. `packages.listFromMisiil()` devuelve solo los paquetes ligados a Misiil y agrega `source: "misiil"`. La nota de bodega va en `warehouseComments` y la descripción en `comments`.
+
+La API también acepta la key en el header `X-Api-Key`; este SDK envía `Authorization: Bearer`.
 
 ### Entorno local
 
