@@ -1,4 +1,6 @@
 import { TrakyHttp } from "./http.js";
+import { ContactsResource } from "./resources/contacts.js";
+import { CustomersResource } from "./resources/customers.js";
 import { OrganizationResource } from "./resources/organization.js";
 import { PackagesResource } from "./resources/packages.js";
 import type { TrakyClientOptions } from "./types.js";
@@ -14,6 +16,8 @@ import type { TrakyClientOptions } from "./types.js";
 export class Traky {
   readonly organization: OrganizationResource;
   readonly packages: PackagesResource;
+  readonly customers: CustomersResource;
+  readonly contacts: ContactsResource;
 
   readonly #http: TrakyHttp;
 
@@ -21,5 +25,7 @@ export class Traky {
     this.#http = new TrakyHttp(options);
     this.organization = new OrganizationResource(this.#http);
     this.packages = new PackagesResource(this.#http);
+    this.customers = new CustomersResource(this.#http);
+    this.contacts = new ContactsResource(this.#http);
   }
 }

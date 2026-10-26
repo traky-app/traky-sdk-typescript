@@ -30,6 +30,20 @@ const traky = new Traky({
 const organization = await traky.organization.retrieve();
 const packages = await traky.packages.list();
 const misiil = await traky.packages.listFromMisiil();
+
+const customers = await traky.customers.list({ page: 1, types: ["CLIENT"] });
+const customer = await traky.customers.create({
+  firstName: "Ana",
+  email: "ana@example.com",
+});
+await traky.customers.update(customer.id, { lastName: "Paz" });
+
+const contact = await traky.contacts.create({
+  firstName: "Luis",
+  types: ["SHIPPER"],
+  clientId: customer.id,
+});
+await traky.contacts.delete(contact.id);
 ```
 
 | Método | Endpoint | Scope |
@@ -37,8 +51,14 @@ const misiil = await traky.packages.listFromMisiil();
 | `organization.retrieve()` | `GET /org-api/v1/organization` | `organization:read` |
 | `packages.list()` | `GET /org-api/v1/packages` | `packages:read` |
 | `packages.listFromMisiil()` | `GET /org-api/v1/marketplaces/misiil/packages` | `packages:read` |
+| `customers.list()` / `customers.retrieve()` | `GET /org-api/v1/customers` | `customers:read` o `organization:read` |
+| `customers.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/customers` | `customers:write` o `organization:read` |
+| `contacts.list()` / `contacts.retrieve()` | `GET /org-api/v1/contacts` | `contacts:read` o `organization:read` |
+| `contacts.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/contacts` | `contacts:write` o `organization:read` |
 
 `packages.list()` devuelve hasta 500 paquetes, los más recientes. Cada paquete trae `packageType` (`WR`), `receiptNumber` y `packageNumber`. En Misiil el recibo es el warehouse (`WHR…`) y el código de paquete es ese recibo más `P1`. `packages.listFromMisiil()` devuelve solo los paquetes ligados a Misiil y agrega `source: "misiil"`. La nota de bodega va en `warehouseComments` y la descripción en `comments`.
+
+`customers` es el cliente con portal. `contacts` es el contacto comercial (remitente, consignatario, etc.) y puede vincularse con `clientId`. Una cuenta personal pide `firstName`; una cuenta `BUSINESS` pide `companyName`. Las claves ya creadas con `organization:read` pueden usar este CRUD. La respuesta no incluye el id de autenticación ni la contraseña del portal.
 
 La API también acepta la key en el header `X-Api-Key`; este SDK envía `Authorization: Bearer`.
 

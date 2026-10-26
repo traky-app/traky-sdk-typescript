@@ -47,6 +47,14 @@ export class TrakyHttp {
     return this.request<T>({ method: "POST", path, body, signal });
   }
 
+  patch<T>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
+    return this.request<T>({ method: "PATCH", path, body, signal });
+  }
+
+  delete<T>(path: string, signal?: AbortSignal): Promise<T> {
+    return this.request<T>({ method: "DELETE", path, signal });
+  }
+
   async request<T>(options: RequestOptions): Promise<T> {
     const url = new URL(`${this.baseUrl}${normalizePath(options.path)}`);
     if (options.query) {
