@@ -75,11 +75,14 @@ await traky.contacts.update(contact.id, { types: ["SHIPPER", "CONSIGNEE"] });
 await traky.contacts.delete(contact.id);
 ```
 
-El ejemplo que crea y borra un cliente y un contacto está en `examples/directory.ts`. El de paquetes, en `examples/list-packages.ts`. Al pasar el cursor sobre `create`, `update`, `list`, `retrieve` o `delete` el editor muestra el cuerpo que hay que enviar.
+El ejemplo de cada recurso está en `examples/`: `organization.ts`, `statuses.ts`, `offices.ts`, `warehouses.ts`, `packages.ts`, `receipts.ts`, `customers.ts` y `contacts.ts`. `examples/directory.ts` crea y borra un cliente y un contacto juntos. Al pasar el cursor sobre `create`, `update`, `list`, `retrieve` o `delete` el editor muestra el cuerpo que hay que enviar.
 
 | Método | Endpoint | Scope |
 | --- | --- | --- |
 | `organization.retrieve()` | `GET /org-api/v1/organization` | `organization:read` |
+| `statuses.list()` | `GET /org-api/v1/statuses` | `organization:read`, `packages:read` o `packages:write` |
+| `offices.list()` | `GET /org-api/v1/offices` | `organization:read`, `packages:read` o `packages:write` |
+| `warehouses.list()` | `GET /org-api/v1/warehouses` | `organization:read`, `packages:read` o `packages:write` |
 | `packages.list()` | `GET /org-api/v1/packages` | `packages:read` |
 | `packages.retrieve()` | `GET /org-api/v1/packages/:id` | `packages:read` |
 | `packages.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/packages` | `packages:write` o `organization:read` |
@@ -90,6 +93,8 @@ El ejemplo que crea y borra un cliente y un contacto está en `examples/director
 | `customers.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/customers` | `customers:write` o `organization:read` |
 | `contacts.list()` / `contacts.retrieve()` | `GET /org-api/v1/contacts` | `contacts:read` o `organization:read` |
 | `contacts.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/contacts` | `contacts:write` o `organization:read` |
+
+`statuses.list()` sin categoría devuelve los estados de paquete, envío, otro y flota. `offices.list()` son las sucursales de atención y `warehouses.list()` las bodegas. El id de la sucursal es el `locationId` de un paquete; el de la bodega, el `warehouseId`.
 
 `packages.list()` devuelve hasta 500 paquetes, los más recientes. Cada paquete trae `packageType` (`WR`), `receiptNumber` y `packageNumber`. En Misiil el recibo es el warehouse (`WHR…`) y el código de paquete es ese recibo más `P1`. `packages.listFromMisiil()` devuelve solo los paquetes ligados a Misiil y agrega `source: "misiil"`. La nota de bodega va en `warehouseComments` y la descripción en `comments`.
 

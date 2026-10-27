@@ -2,7 +2,7 @@ export { Traky } from "./client.js";
 export { TrakyApiError, TrakyError } from "./errors.js";
 export { DEFAULT_BASE_URL } from "./http.js";
 export { SDK_NAME, SDK_VERSION } from "./version.js";
-export { ACCOUNT_TYPES, CONTACT_TYPES, CUSTOMER_TYPES } from "./types.js";
+export { ACCOUNT_TYPES, CONTACT_TYPES, CUSTOMER_TYPES, STATUS_CATEGORIES } from "./types.js";
 export type {
   AccountType,
   Contact,
@@ -22,6 +22,8 @@ export type {
   DeletedReceipt,
   MisiilPackageExport,
   Organization,
+  Office,
+  OfficeList,
   Package,
   PackageCreate,
   PackageExport,
@@ -39,5 +41,11 @@ export type {
   ReceiptPackagePatch,
   ReceiptPage,
   ReceiptUpdate,
+  Status,
+  StatusCategory,
+  StatusList,
+  StatusListParams,
+  Warehouse,
+  WarehouseList,
   TrakyClientOptions,
 } from "./types.js";

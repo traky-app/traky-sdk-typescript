@@ -9,6 +9,73 @@ export type Organization = {
   organizationId: string | null;
 };
 
+/** Categorías de estado. Sin filtro, `statuses.list()` devuelve las cuatro. */
+export const STATUS_CATEGORIES = ["package", "shipment", "other", "fleet"] as const;
+
+export type StatusCategory = (typeof STATUS_CATEGORIES)[number];
+
+/** Estado de paquete, envío, otro o flota. `label` es el nombre visible. */
+export type Status = {
+  id: string;
+  label: string;
+  description: string;
+  position: number;
+  icon: string;
+  category: StatusCategory;
+  isActive: boolean;
+  isVisible: boolean;
+  isHiddenFromClient: boolean;
+  warehouseId: string | null;
+  locationId: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+export type StatusList = {
+  data: Status[];
+};
+
+export type StatusListParams = {
+  /** Si se omite, la respuesta incluye todas las categorías. */
+  category?: StatusCategory;
+};
+
+/** Sucursal de atención. `isWarehouseOnly` es false. */
+export type Office = {
+  id: string;
+  name: string | null;
+  isWarehouseOnly: boolean;
+  isActive: boolean;
+  isMain: boolean;
+  countryCode: string;
+  stateOrProvince: string;
+  stateCode: string;
+  city: string;
+  cityCode: string;
+  address: string;
+  suiteOrApt: string;
+  postalCode: string;
+  phoneNumber: string;
+  fax: string;
+  note: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+export type OfficeList = {
+  data: Office[];
+};
+
+/** Bodega. Incluye el precio por libra de cliente y de proveedor. */
+export type Warehouse = Office & {
+  pricePerPoundClient: number;
+  pricePerPoundProvider: number;
+};
+
+export type WarehouseList = {
+  data: Warehouse[];
+};
+
 /** Prefijo interno del recibo. Hoy el único tipo es WR. */
 export type PackageType = "WR";
 

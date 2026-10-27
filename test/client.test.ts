@@ -65,9 +65,12 @@ describe("Traky", () => {
     expect(Object.keys(client).sort()).toEqual([
       "contacts",
       "customers",
+      "offices",
       "organization",
       "packages",
       "receipts",
+      "statuses",
+      "warehouses",
     ]);
     expect(
       Object.getOwnPropertyNames(Object.getPrototypeOf(client.organization))
@@ -120,6 +123,97 @@ describe("Traky", () => {
       "/org-api/v1/marketplaces/misiil/packages",
     ]);
     expect(misiil.source).toBe("misiil");
+  });
+
+  it("recorre todas las funciones del SDK", async () => {
+    const calls: { method: string; url: string }[] = [];
+    const client = new Traky({
+      apiKey: "trk_test",
+      fetch: async (input, init) => {
+        const request = new Request(input, init);
+        const url = new URL(request.url);
+        calls.push({
+          method: request.method,
+          url: `${url.pathname}${url.search}`,
+        });
+        return jsonResponse({
+          id: "res_1",
+          data: [],
+          total: 0,
+          exportedAt: "2026-10-27T00:00:00.000Z",
+          source: "misiil",
+          pagination: { limit: 50 },
+          deleted: true,
+          deletedCount: 1,
+        });
+      },
+    });
+
+    await client.organization.retrieve();
+    await client.statuses.list();
+    await client.statuses.list({ category: "package" });
+    await client.offices.list();
+    await client.warehouses.list();
+    await client.packages.list();
+    await client.packages.listFromMisiil();
+    await client.packages.retrieve("pkg_1");
+    await client.packages.create({
+      registrationDate: "2026-10-27T00:00:00.000Z",
+      trackingNumber: "1Z999",
+      itemStatusId: "st_1",
+      locationId: "loc_1",
+    });
+    await client.packages.update("pkg_1", { warehouseComments: "Nota" });
+    await client.packages.delete("pkg_1");
+    await client.receipts.list();
+    await client.receipts.retrieve("pkg_1");
+    await client.receipts.create({
+      registrationDate: "2026-10-27T00:00:00.000Z",
+      locationId: "loc_1",
+      itemStatusId: "st_1",
+      packages: [{ trackingNumber: "1Z111" }],
+    });
+    await client.receipts.update("pkg_1", { comments: "Ropa" });
+    await client.receipts.delete("pkg_1");
+    await client.customers.list();
+    await client.customers.retrieve("cus_1");
+    await client.customers.create({ firstName: "Ana", createContact: false });
+    await client.customers.update("cus_1", { lastName: "Paz" });
+    await client.customers.delete("cus_1");
+    await client.contacts.list();
+    await client.contacts.retrieve("con_1");
+    await client.contacts.create({ firstName: "Luis", types: ["SHIPPER"] });
+    await client.contacts.update("con_1", { types: ["CONSIGNEE"] });
+    await client.contacts.delete("con_1");
+
+    expect(calls.map((call) => `${call.method} ${call.url}`)).toEqual([
+      "GET /org-api/v1/organization",
+      "GET /org-api/v1/statuses",
+      "GET /org-api/v1/statuses?category=package",
+      "GET /org-api/v1/offices",
+      "GET /org-api/v1/warehouses",
+      "GET /org-api/v1/packages",
+      "GET /org-api/v1/marketplaces/misiil/packages",
+      "GET /org-api/v1/packages/pkg_1",
+      "POST /org-api/v1/packages",
+      "PATCH /org-api/v1/packages/pkg_1",
+      "DELETE /org-api/v1/packages/pkg_1",
+      "GET /org-api/v1/receipts",
+      "GET /org-api/v1/receipts/pkg_1",
+      "POST /org-api/v1/receipts",
+      "PATCH /org-api/v1/receipts/pkg_1",
+      "DELETE /org-api/v1/receipts/pkg_1",
+      "GET /org-api/v1/customers",
+      "GET /org-api/v1/customers/cus_1",
+      "POST /org-api/v1/customers",
+      "PATCH /org-api/v1/customers/cus_1",
+      "DELETE /org-api/v1/customers/cus_1",
+      "GET /org-api/v1/contacts",
+      "GET /org-api/v1/contacts/con_1",
+      "POST /org-api/v1/contacts",
+      "PATCH /org-api/v1/contacts/con_1",
+      "DELETE /org-api/v1/contacts/con_1",
+    ]);
   });
 
   it("hace el CRUD de paquetes y de recibos", async () => {
