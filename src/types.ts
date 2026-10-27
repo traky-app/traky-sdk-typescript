@@ -80,6 +80,197 @@ export type PackageExport = {
   exportedAt: string;
 };
 
+export type PackageFile = {
+  name: string;
+  url: string;
+  type: string;
+};
+
+/** Caja dentro de un paquete. */
+export type PackagePiece = {
+  quantity?: number;
+  weight?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  declaredValue?: number;
+  trackingNumber?: string;
+  comments?: string;
+  warehouseFileUrl?: PackageFile[];
+};
+
+/**
+ * Campos de `packages.create` y `packages.update`.
+ * En el alta hacen falta `registrationDate`, `trackingNumber`, `itemStatusId` y `locationId`.
+ */
+export type PackageWrite = {
+  registrationDate?: string;
+  trackingNumber?: string;
+  /** Recibo de proveedor (`WHR…`). El paquete no consume la secuencia WR. */
+  externalReceiptCode?: string;
+  /** 1 → P1. Por defecto 1. */
+  receiptPackageIndex?: number;
+  /** Serial de un recibo ya creado, para agregar P2, P3… */
+  receiptSerialNumber?: number;
+  declaredValue?: number;
+  weight?: number;
+  height?: number;
+  width?: number;
+  length?: number;
+  pieces?: number;
+  packagePieces?: PackagePiece[];
+  volumetricWeight?: number;
+  chargeableWeight?: number;
+  volumetricRule?: string;
+  volumetricDivisor?: number;
+  weightUnit?: string;
+  dimensionUnit?: string;
+  itemStatusId?: string;
+  customerId?: string;
+  shipperId?: string;
+  warehouseId?: string;
+  locationId?: string;
+  customerShippingAddressId?: string;
+  shipperShippingAddressId?: string;
+  /** Descripción de la mercancía. */
+  comments?: string;
+  /** Nota de bodega. */
+  warehouseComments?: string;
+  isConsolidated?: boolean;
+  isGrouped?: boolean;
+  warehouseFileUrl?: PackageFile[];
+  /**
+   * En un update, copia remitente y destinatario al resto del recibo.
+   */
+  propagatePartiesToReceiptSiblings?: boolean;
+};
+
+/** Cuerpo de `packages.create`. */
+export type PackageCreate = PackageWrite & {
+  registrationDate: string;
+  trackingNumber: string;
+  itemStatusId: string;
+  locationId: string;
+};
+
+/** Una pieza al crear un recibo. El orden de la lista es P1, P2… si no se envía índice. */
+export type ReceiptPackageLine = {
+  trackingNumber: string;
+  receiptPackageIndex?: number;
+  declaredValue?: number;
+  weight?: number;
+  height?: number;
+  width?: number;
+  length?: number;
+  pieces?: number;
+  comments?: string;
+  warehouseComments?: string;
+  customerId?: string;
+  shipperId?: string;
+  customerShippingAddressId?: string;
+  shipperShippingAddressId?: string;
+  packagePieces?: PackagePiece[];
+  warehouseFileUrl?: PackageFile[];
+};
+
+/**
+ * Cuerpo de `receipts.create`.
+ * Las piezas comparten código de recibo. Sin `externalReceiptCode` el API reserva un WR.
+ */
+export type ReceiptCreate = {
+  registrationDate: string;
+  locationId: string;
+  itemStatusId: string;
+  externalReceiptCode?: string;
+  customerId?: string;
+  shipperId?: string;
+  warehouseId?: string;
+  customerShippingAddressId?: string;
+  shipperShippingAddressId?: string;
+  weightUnit?: string;
+  dimensionUnit?: string;
+  volumetricRule?: string;
+  volumetricDivisor?: number;
+  comments?: string;
+  warehouseComments?: string;
+  packages: ReceiptPackageLine[];
+};
+
+/** Pieza ya guardada dentro de `receipts.update`. */
+export type ReceiptPackagePatch = Partial<
+  Omit<ReceiptPackageLine, "trackingNumber">
+> & {
+  id: string;
+  trackingNumber?: string;
+};
+
+/**
+ * Cuerpo de `receipts.update`.
+ * Los campos de arriba se aplican a todas las piezas. `packages` cambia una pieza por id.
+ */
+export type ReceiptUpdate = {
+  registrationDate?: string;
+  locationId?: string;
+  itemStatusId?: string;
+  customerId?: string;
+  shipperId?: string;
+  warehouseId?: string;
+  customerShippingAddressId?: string;
+  shipperShippingAddressId?: string;
+  weightUnit?: string;
+  dimensionUnit?: string;
+  volumetricRule?: string;
+  volumetricDivisor?: number;
+  comments?: string;
+  warehouseComments?: string;
+  packages?: ReceiptPackagePatch[];
+};
+
+/**
+ * Recibo: grupo de paquetes con el mismo código.
+ * `id` es el id del primer paquete (P1). Sirve para retrieve, update y delete
+ * aunque pases el id de otra pieza del mismo recibo.
+ */
+export type Receipt = {
+  id: string;
+  receiptNumber: string | null;
+  serialNumber: number | null;
+  locationId: string | null;
+  packageCount: number;
+  registrationDate: string | null;
+  totalWeight: number;
+  totalPieces: number;
+  totalDeclaredValue: number;
+  guideId: string | null;
+  isLocked: boolean;
+  trackingNumbers: string | null;
+  customer: PackageParty | null;
+  shipper: PackageParty | null;
+  itemStatus: PackageStatus | null;
+  location: PackageOffice | null;
+  /** Presente en retrieve, create y update. El listado no lo trae. */
+  packages?: Package[];
+};
+
+export type ReceiptPage = {
+  data: Receipt[];
+  pagination: DirectoryPage<Receipt>["pagination"];
+};
+
+export type ReceiptListParams = {
+  page?: number;
+  limit?: number;
+  trackingNumber?: string;
+  locationId?: string;
+  customerId?: string;
+  shipperId?: string;
+  itemStatusId?: string;
+};
+
+export type DeletedReceipt = DeletedResource & {
+  deletedCount: number;
+};
+
 export type MisiilPackageExport = PackageExport & {
   source: "misiil";
 };

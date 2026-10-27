@@ -3,6 +3,7 @@ import { ContactsResource } from "./resources/contacts.js";
 import { CustomersResource } from "./resources/customers.js";
 import { OrganizationResource } from "./resources/organization.js";
 import { PackagesResource } from "./resources/packages.js";
+import { ReceiptsResource } from "./resources/receipts.js";
 import type { TrakyClientOptions } from "./types.js";
 
 /**
@@ -16,8 +17,10 @@ import type { TrakyClientOptions } from "./types.js";
 export class Traky {
   /** Organización dueña de la API key. */
   readonly organization: OrganizationResource;
-  /** Exportación de paquetes y de paquetes de Misiil. */
+  /** Paquetes de la organización. */
   readonly packages: PackagesResource;
+  /** Recibos: grupos de paquetes con el mismo código. */
+  readonly receipts: ReceiptsResource;
   /** Clientes con portal. El alta usa `CustomerCreate` (`createContact`). */
   readonly customers: CustomersResource;
   /** Contactos comerciales. El rol se envía en `ContactWrite.types`. */
@@ -32,6 +35,7 @@ export class Traky {
     this.#http = new TrakyHttp(options);
     this.organization = new OrganizationResource(this.#http);
     this.packages = new PackagesResource(this.#http);
+    this.receipts = new ReceiptsResource(this.#http);
     this.customers = new CustomersResource(this.#http);
     this.contacts = new ContactsResource(this.#http);
   }

@@ -67,6 +67,7 @@ describe("Traky", () => {
       "customers",
       "organization",
       "packages",
+      "receipts",
     ]);
     expect(
       Object.getOwnPropertyNames(Object.getPrototypeOf(client.organization))
@@ -77,7 +78,7 @@ describe("Traky", () => {
       Object.getOwnPropertyNames(Object.getPrototypeOf(client.packages))
         .filter((name) => name !== "constructor")
         .sort(),
-    ).toEqual(["list", "listFromMisiil"]);
+    ).toEqual(["create", "delete", "list", "listFromMisiil", "retrieve", "update"]);
 
     await client.organization.retrieve();
     await client.packages.list();
@@ -119,6 +120,84 @@ describe("Traky", () => {
       "/org-api/v1/marketplaces/misiil/packages",
     ]);
     expect(misiil.source).toBe("misiil");
+  });
+
+  it("hace el CRUD de paquetes y de recibos", async () => {
+    const calls: { method: string; url: string; body: string | null }[] = [];
+    const client = new Traky({
+      apiKey: "trk_test",
+      fetch: async (input, init) => {
+        const request = new Request(input, init);
+        calls.push({
+          method: request.method,
+          url: `${new URL(request.url).pathname}${new URL(request.url).search}`,
+          body: init?.body ? String(init.body) : null,
+        });
+        return jsonResponse({
+          id: "pkg_1",
+          deleted: true,
+          deletedCount: 2,
+          data: [],
+          pagination: { limit: 50 },
+        });
+      },
+    });
+
+    expect(
+      Object.getOwnPropertyNames(Object.getPrototypeOf(client.receipts))
+        .filter((name) => name !== "constructor")
+        .sort(),
+    ).toEqual(["create", "delete", "list", "retrieve", "update"]);
+
+    await client.packages.retrieve("pkg 1");
+    await client.packages.create({
+      registrationDate: "2026-10-27T00:00:00.000Z",
+      trackingNumber: "1Z999",
+      itemStatusId: "st_1",
+      locationId: "loc_1",
+    });
+    await client.packages.update("pkg_1", { warehouseComments: "Retener" });
+    await client.packages.delete("pkg_1");
+    await client.receipts.list({ page: 2, trackingNumber: "WR0000008" });
+    await client.receipts.retrieve("pkg_1");
+    await client.receipts.create({
+      registrationDate: "2026-10-27T00:00:00.000Z",
+      locationId: "loc_1",
+      itemStatusId: "st_1",
+      packages: [{ trackingNumber: "1Z111" }, { trackingNumber: "1Z222" }],
+    });
+    await client.receipts.update("pkg_1", {
+      warehouseComments: "Frágil",
+      packages: [{ id: "pkg_2", weight: 4 }],
+    });
+    await client.receipts.delete("pkg_1");
+
+    expect(calls.map((call) => `${call.method} ${call.url}`)).toEqual([
+      "GET /org-api/v1/packages/pkg%201",
+      "POST /org-api/v1/packages",
+      "PATCH /org-api/v1/packages/pkg_1",
+      "DELETE /org-api/v1/packages/pkg_1",
+      "GET /org-api/v1/receipts?page=2&trackingNumber=WR0000008",
+      "GET /org-api/v1/receipts/pkg_1",
+      "POST /org-api/v1/receipts",
+      "PATCH /org-api/v1/receipts/pkg_1",
+      "DELETE /org-api/v1/receipts/pkg_1",
+    ]);
+    expect(calls[1]?.body).toBe(
+      JSON.stringify({
+        registrationDate: "2026-10-27T00:00:00.000Z",
+        trackingNumber: "1Z999",
+        itemStatusId: "st_1",
+        locationId: "loc_1",
+      }),
+    );
+    expect(calls[6]?.body).toContain('"trackingNumber":"1Z111"');
+    expect(calls[7]?.body).toBe(
+      JSON.stringify({
+        warehouseComments: "Frágil",
+        packages: [{ id: "pkg_2", weight: 4 }],
+      }),
+    );
   });
 
   it("hace el CRUD de clientes y contactos", async () => {

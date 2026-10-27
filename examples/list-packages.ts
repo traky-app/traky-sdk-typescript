@@ -13,4 +13,5 @@ console.log(organization.name, organization.slug);
 const packages = await traky.packages.list();
 console.log(packages.total, "paquetes", packages.exportedAt);
 
-// Alta de clientes y contactos, con CustomerWrite y ContactWrite: examples/directory.ts
+// Alta de clientes y contactos: examples/directory.ts
+// Alta de un paquete: traky.packages.create. Alta de un recibo: traky.receipts.create.
