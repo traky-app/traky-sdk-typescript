@@ -2,6 +2,8 @@
 
 SDK de Node.js para la [API de organización de Traky](https://api.traky.app). Autentica con una API key (`trk_…`) y llama a `/org-api/v1`.
 
+La documentación está en https://traky.app/docs.
+
 Requiere Node.js 20 o superior. No tiene dependencias de runtime: usa `fetch`.
 
 ## Instalación
