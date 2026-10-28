@@ -191,7 +191,7 @@ describe("Traky", () => {
       "GET /org-api/v1/statuses",
       "GET /org-api/v1/statuses?category=package",
       "GET /org-api/v1/offices",
-      "GET /org-api/v1/warehouses",
+      "GET /org-api/v1/offices?type=warehouse",
       "GET /org-api/v1/packages",
       "GET /org-api/v1/marketplaces/misiil/packages",
       "GET /org-api/v1/packages/pkg_1",
@@ -378,6 +378,126 @@ describe("Traky", () => {
     await expect(client.organization.retrieve()).rejects.toBeInstanceOf(
       TrakyApiError,
     );
+  });
+
+  it("no deja que un header extra reemplace Authorization", async () => {
+    let authorization: string | null = null;
+    let contentType: string | null = null;
+    const client = new Traky({
+      apiKey: "trk_test",
+      headers: {
+        Authorization: "Bearer otro",
+        "Content-Type": "text/plain",
+        "X-Request-Id": "req_1",
+      },
+      fetch: async (input, init) => {
+        const request = new Request(input, init);
+        authorization = request.headers.get("authorization");
+        contentType = request.headers.get("content-type");
+        expect(request.headers.get("x-request-id")).toBe("req_1");
+        return jsonResponse({ id: "pkg_1" });
+      },
+    });
+
+    await client.packages.create({
+      registrationDate: "2026-10-27T00:00:00.000Z",
+      trackingNumber: "1Z999",
+      itemStatusId: "st_1",
+      locationId: "loc_1",
+      receiptSerialNumber: 1204,
+      receiptPackageIndex: 2,
+    });
+    expect(authorization).toBe("Bearer trk_test");
+    expect(contentType).toBe("application/json");
+  });
+
+  it("agrega P2 a un recibo y borra solo ese paquete", async () => {
+    const calls: { method: string; url: string; body: string | null }[] = [];
+    const client = new Traky({
+      apiKey: "trk_test",
+      fetch: async (input, init) => {
+        const request = new Request(input, init);
+        calls.push({
+          method: request.method,
+          url: new URL(request.url).pathname,
+          body: init?.body ? String(init.body) : null,
+        });
+        if (request.method === "DELETE") {
+          return jsonResponse({ id: "pkg_2", deleted: true });
+        }
+        return jsonResponse({
+          id: "pkg_2",
+          packageNumber: "WR00001204P2",
+          receiptNumber: "WR00001204",
+        });
+      },
+    });
+
+    const created = await client.packages.create({
+      registrationDate: "2026-10-27T00:00:00.000Z",
+      trackingNumber: "1Z222",
+      itemStatusId: "st_1",
+      locationId: "loc_1",
+      receiptSerialNumber: 1204,
+      receiptPackageIndex: 2,
+      weight: 3,
+      comments: "Ropa",
+    });
+    const removed = await client.packages.delete(created.id);
+
+    expect(created.packageNumber).toBe("WR00001204P2");
+    expect(removed).toEqual({ id: "pkg_2", deleted: true });
+    expect(calls.map((call) => `${call.method} ${call.url}`)).toEqual([
+      "POST /org-api/v1/packages",
+      "DELETE /org-api/v1/packages/pkg_2",
+    ]);
+    expect(calls[0]?.body).toBe(
+      JSON.stringify({
+        registrationDate: "2026-10-27T00:00:00.000Z",
+        trackingNumber: "1Z222",
+        itemStatusId: "st_1",
+        locationId: "loc_1",
+        receiptSerialNumber: 1204,
+        receiptPackageIndex: 2,
+        weight: 3,
+        comments: "Ropa",
+      }),
+    );
+    expect(calls[1]?.body).toBeNull();
+  });
+
+  it("lista estados, sucursales y bodegas", async () => {
+    const paths: string[] = [];
+    const client = new Traky({
+      apiKey: "trk_test",
+      fetch: async (input) => {
+        const request = new Request(input);
+        const url = new URL(request.url);
+        paths.push(`${request.method} ${url.pathname}${url.search}`);
+        return jsonResponse({ data: [] });
+      },
+    });
+
+    for (const resource of [client.statuses, client.offices, client.warehouses]) {
+      expect(
+        Object.getOwnPropertyNames(Object.getPrototypeOf(resource))
+          .filter((name) => name !== "constructor")
+          .sort(),
+      ).toEqual(["list"]);
+    }
+
+    await client.statuses.list();
+    await client.statuses.list({ category: "shipment" });
+    await client.offices.list();
+    await client.offices.list({ type: "office" });
+    await client.warehouses.list();
+    expect(paths).toEqual([
+      "GET /org-api/v1/statuses",
+      "GET /org-api/v1/statuses?category=shipment",
+      "GET /org-api/v1/offices",
+      "GET /org-api/v1/offices?type=office",
+      "GET /org-api/v1/offices?type=warehouse",
+    ]);
   });
 
   it("falla si la petición expira", async () => {

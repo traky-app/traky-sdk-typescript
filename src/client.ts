@@ -22,9 +22,9 @@ export class Traky {
   readonly organization: OrganizationResource;
   /** Estados de paquete, envío, otro y flota. */
   readonly statuses: StatusesResource;
-  /** Sucursales de atención. */
+  /** Offices. `type` es `office` o `warehouse`. */
   readonly offices: OfficesResource;
-  /** Bodegas. */
+  /** Bodegas. Atajo de `offices.list({ type: "warehouse" })`. */
   readonly warehouses: WarehousesResource;
   /** Paquetes de la organización. */
   readonly packages: PackagesResource;

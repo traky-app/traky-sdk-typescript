@@ -40,11 +40,20 @@ export type StatusListParams = {
   category?: StatusCategory;
 };
 
-/** Sucursal de atención. `isWarehouseOnly` es false. */
+/** Tipo de office. `office` atiende al cliente. `warehouse` es bodega. */
+export const OFFICE_TYPES = ["office", "warehouse"] as const;
+
+export type OfficeType = (typeof OFFICE_TYPES)[number];
+
+/**
+ * Office de la organización.
+ * `type` distingue la sucursal de atención de la bodega. El precio por libra
+ * solo viene cuando `type` es `warehouse`.
+ */
 export type Office = {
   id: string;
+  type: OfficeType;
   name: string | null;
-  isWarehouseOnly: boolean;
   isActive: boolean;
   isMain: boolean;
   countryCode: string;
@@ -60,14 +69,22 @@ export type Office = {
   note: string;
   createdAt: string | null;
   updatedAt: string | null;
+  pricePerPoundClient?: number;
+  pricePerPoundProvider?: number;
 };
 
 export type OfficeList = {
   data: Office[];
 };
 
-/** Bodega. Incluye el precio por libra de cliente y de proveedor. */
+export type OfficeListParams = {
+  /** Si se omite, la respuesta incluye `office` y `warehouse`. */
+  type?: OfficeType;
+};
+
+/** Bodega: un office con `type: "warehouse"` y precio por libra. */
 export type Warehouse = Office & {
+  type: "warehouse";
   pricePerPoundClient: number;
   pricePerPoundProvider: number;
 };

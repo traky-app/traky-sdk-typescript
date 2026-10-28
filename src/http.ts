@@ -73,9 +73,9 @@ export class TrakyHttp {
     try {
       const headers: Record<string, string> = {
         Accept: "application/json",
+        ...this.extraHeaders,
         Authorization: `Bearer ${this.apiKey}`,
         "User-Agent": `${SDK_NAME}/${SDK_VERSION}`,
-        ...this.extraHeaders,
       };
       if (options.body !== undefined) {
         headers["Content-Type"] = "application/json";
