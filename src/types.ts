@@ -40,6 +40,38 @@ export type StatusListParams = {
   category?: StatusCategory;
 };
 
+/** Categorías que acepta el alta. `shipment` ya no se puede crear. */
+export type StatusWriteCategory = Exclude<StatusCategory, "shipment">;
+
+/**
+ * Cuerpo de `statuses.update`.
+ * `warehouseId` o `locationId` en `null` quita ese vínculo.
+ */
+export type StatusWrite = {
+  label?: string;
+  description?: string;
+  /** Orden en el panel. De 1 a 30. */
+  position?: number;
+  category?: StatusWriteCategory;
+  icon?: string;
+  isActive?: boolean;
+  isVisible?: boolean;
+  isHiddenFromClient?: boolean;
+  warehouseId?: string | null;
+  locationId?: string | null;
+};
+
+/**
+ * Cuerpo de `statuses.create`.
+ * Hacen falta `label`, `description`, `category` e `icon`.
+ */
+export type StatusCreate = StatusWrite & {
+  label: string;
+  description: string;
+  category: StatusWriteCategory;
+  icon: string;
+};
+
 /** Tipo de office. `office` atiende al cliente. `warehouse` es bodega. */
 export const OFFICE_TYPES = ["office", "warehouse"] as const;
 

@@ -82,7 +82,8 @@ El ejemplo de cada recurso está en `examples/`: `organization.ts`, `statuses.ts
 | Método | Endpoint | Scope |
 | --- | --- | --- |
 | `organization.retrieve()` | `GET /org-api/v1/organization` | `organization:read` |
-| `statuses.list()` | `GET /org-api/v1/statuses` | `organization:read`, `packages:read` o `packages:write` |
+| `statuses.list()` / `statuses.retrieve()` | `GET /org-api/v1/statuses` | `organization:read`, `packages:read` o `packages:write` |
+| `statuses.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/statuses` | `packages:write` o `organization:read` |
 | `offices.list()` | `GET /org-api/v1/offices` | `organization:read`, `packages:read` o `packages:write` |
 | `offices.list({ type })` | `GET /org-api/v1/offices?type=office` o `warehouse` | `organization:read`, `packages:read` o `packages:write` |
 | `warehouses.list()` | `GET /org-api/v1/offices?type=warehouse` | `organization:read`, `packages:read` o `packages:write` |
@@ -97,7 +98,7 @@ El ejemplo de cada recurso está en `examples/`: `organization.ts`, `statuses.ts
 | `contacts.list()` / `contacts.retrieve()` | `GET /org-api/v1/contacts` | `contacts:read` o `organization:read` |
 | `contacts.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/contacts` | `contacts:write` o `organization:read` |
 
-`statuses.list()` sin categoría devuelve los estados de paquete, envío, otro y flota. `offices.list()` devuelve sucursales y bodegas. Cada fila trae `type`: `office` atiende al cliente y `warehouse` es bodega. `offices.list({ type: "office" })` deja solo sucursales; `type: "warehouse"` (o `warehouses.list()`) deja solo bodegas. El id de una sucursal es el `locationId` de un paquete; el de una bodega, el `warehouseId`. Una bodega también trae `pricePerPoundClient` y `pricePerPoundProvider`.
+`statuses.list()` sin categoría devuelve los estados de paquete, envío, otro y flota. `statuses.create` recibe `StatusCreate`: `label`, `description`, `category` (`package`, `other` o `fleet`) e `icon`. `shipment` ya no se puede crear. `statuses.update` recibe `StatusWrite`. `warehouseId` o `locationId` en `null` quita ese vínculo. Las claves ya creadas con `organization:read` pueden usar este CRUD. Una clave solo con `packages:read` puede listar, no escribir. El id de un estado de paquete es el `itemStatusId` de un paquete o un recibo. `offices.list()` devuelve sucursales y bodegas. Cada fila trae `type`: `office` atiende al cliente y `warehouse` es bodega. `offices.list({ type: "office" })` deja solo sucursales; `type: "warehouse"` (o `warehouses.list()`) deja solo bodegas. El id de una sucursal es el `locationId` de un paquete; el de una bodega, el `warehouseId`. Una bodega también trae `pricePerPoundClient` y `pricePerPoundProvider`.
 
 `packages.list()` devuelve hasta 500 paquetes, los más recientes. Cada paquete trae `packageType` (`WR`), `receiptNumber` y `packageNumber`. En Misiil el recibo es el warehouse (`WHR…`) y el código de paquete es ese recibo más `P1`. `packages.listFromMisiil()` devuelve solo los paquetes ligados a Misiil y agrega `source: "misiil"`. La nota de bodega va en `warehouseComments` y la descripción en `comments`.
 

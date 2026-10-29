@@ -152,6 +152,15 @@ describe("Traky", () => {
     await client.organization.retrieve();
     await client.statuses.list();
     await client.statuses.list({ category: "package" });
+    await client.statuses.retrieve("st_1");
+    await client.statuses.create({
+      label: "En bodega",
+      description: "Llegó",
+      category: "package",
+      icon: "package",
+    });
+    await client.statuses.update("st_1", { label: "Recibido" });
+    await client.statuses.delete("st_1");
     await client.offices.list();
     await client.warehouses.list();
     await client.packages.list();
@@ -190,6 +199,10 @@ describe("Traky", () => {
       "GET /org-api/v1/organization",
       "GET /org-api/v1/statuses",
       "GET /org-api/v1/statuses?category=package",
+      "GET /org-api/v1/statuses/st_1",
+      "POST /org-api/v1/statuses",
+      "PATCH /org-api/v1/statuses/st_1",
+      "DELETE /org-api/v1/statuses/st_1",
       "GET /org-api/v1/offices",
       "GET /org-api/v1/offices?type=warehouse",
       "GET /org-api/v1/packages",
@@ -478,7 +491,13 @@ describe("Traky", () => {
       },
     });
 
-    for (const resource of [client.statuses, client.offices, client.warehouses]) {
+    expect(
+      Object.getOwnPropertyNames(Object.getPrototypeOf(client.statuses))
+        .filter((name) => name !== "constructor")
+        .sort(),
+    ).toEqual(["create", "delete", "list", "retrieve", "update"]);
+
+    for (const resource of [client.offices, client.warehouses]) {
       expect(
         Object.getOwnPropertyNames(Object.getPrototypeOf(resource))
           .filter((name) => name !== "constructor")
