@@ -210,8 +210,14 @@ export type PackagePiece = {
   width?: number;
   height?: number;
   declaredValue?: number;
+  /**
+   * Embalaje logístico de la línea (`box`, `pallet`, `bag`, …).
+   * Opcional: si no se envía, el API no guarda el campo.
+   */
+  packagingType?: string;
   trackingNumber?: string;
   comments?: string;
+  scanComments?: string;
   warehouseFileUrl?: PackageFile[];
 };
 
