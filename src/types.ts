@@ -79,8 +79,7 @@ export type OfficeType = (typeof OFFICE_TYPES)[number];
 
 /**
  * Office de la organización.
- * `type` distingue la sucursal de atención de la bodega. El precio por libra
- * solo viene cuando `type` es `warehouse`.
+ * `type` distingue la sucursal de atención de la bodega.
  */
 export type Office = {
   id: string;
@@ -101,8 +100,6 @@ export type Office = {
   note: string;
   createdAt: string | null;
   updatedAt: string | null;
-  pricePerPoundClient?: number;
-  pricePerPoundProvider?: number;
 };
 
 export type OfficeList = {
@@ -114,11 +111,9 @@ export type OfficeListParams = {
   type?: OfficeType;
 };
 
-/** Bodega: un office con `type: "warehouse"` y precio por libra. */
+/** Bodega: un office con `type: "warehouse"`. */
 export type Warehouse = Office & {
   type: "warehouse";
-  pricePerPoundClient: number;
-  pricePerPoundProvider: number;
 };
 
 export type WarehouseList = {

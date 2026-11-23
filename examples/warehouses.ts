@@ -6,6 +6,5 @@ for (const warehouse of warehouses.data) {
     warehouse.id,
     warehouse.name,
     warehouse.city,
-    warehouse.pricePerPoundClient,
   );
 }
