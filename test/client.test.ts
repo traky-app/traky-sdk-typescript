@@ -188,12 +188,10 @@ describe("Traky", () => {
     await client.customers.retrieve("cus_1");
     await client.customers.create({ firstName: "Ana", createContact: false });
     await client.customers.update("cus_1", { lastName: "Paz" });
-    await client.customers.delete("cus_1");
     await client.contacts.list();
     await client.contacts.retrieve("con_1");
     await client.contacts.create({ firstName: "Luis", types: ["SHIPPER"] });
     await client.contacts.update("con_1", { types: ["CONSIGNEE"] });
-    await client.contacts.delete("con_1");
 
     expect(calls.map((call) => `${call.method} ${call.url}`)).toEqual([
       "GET /org-api/v1/organization",
@@ -220,12 +218,10 @@ describe("Traky", () => {
       "GET /org-api/v1/customers/cus_1",
       "POST /org-api/v1/customers",
       "PATCH /org-api/v1/customers/cus_1",
-      "DELETE /org-api/v1/customers/cus_1",
       "GET /org-api/v1/contacts",
       "GET /org-api/v1/contacts/con_1",
       "POST /org-api/v1/contacts",
       "PATCH /org-api/v1/contacts/con_1",
-      "DELETE /org-api/v1/contacts/con_1",
     ]);
   });
 
@@ -331,12 +327,12 @@ describe("Traky", () => {
       Object.getOwnPropertyNames(Object.getPrototypeOf(client.customers))
         .filter((name) => name !== "constructor")
         .sort(),
-    ).toEqual(["create", "delete", "list", "retrieve", "update"]);
+    ).toEqual(["create", "list", "retrieve", "update"]);
     expect(
       Object.getOwnPropertyNames(Object.getPrototypeOf(client.contacts))
         .filter((name) => name !== "constructor")
         .sort(),
-    ).toEqual(["create", "delete", "list", "retrieve", "update"]);
+    ).toEqual(["create", "list", "retrieve", "update"]);
 
     await client.customers.list({
       page: 2,
@@ -346,27 +342,23 @@ describe("Traky", () => {
     await client.customers.retrieve("cus 1");
     await client.customers.create({ firstName: "Ana" });
     await client.customers.update("cus_1", { lastName: "Paz" });
-    await client.customers.delete("cus_1");
     await client.contacts.list({ linked: false, clientId: "cus_1" });
     await client.contacts.create({ firstName: "Luis", clientId: "cus_1" });
     await client.contacts.update("con_1", { clientId: null });
     await client.contacts.retrieve("con_1");
-    await client.contacts.delete("con_1");
 
     expect(calls.map((call) => `${call.method} ${call.url}`)).toEqual([
       "GET /org-api/v1/customers?page=2&isActive=true&types=CLIENT%2CSHIPPER",
       "GET /org-api/v1/customers/cus%201",
       "POST /org-api/v1/customers",
       "PATCH /org-api/v1/customers/cus_1",
-      "DELETE /org-api/v1/customers/cus_1",
       "GET /org-api/v1/contacts?linked=false&clientId=cus_1",
       "POST /org-api/v1/contacts",
       "PATCH /org-api/v1/contacts/con_1",
       "GET /org-api/v1/contacts/con_1",
-      "DELETE /org-api/v1/contacts/con_1",
     ]);
     expect(calls[2]?.body).toBe(JSON.stringify({ firstName: "Ana" }));
-    expect(calls[7]?.body).toBe(JSON.stringify({ clientId: null }));
+    expect(calls[6]?.body).toBe(JSON.stringify({ clientId: null }));
   });
 
   it("traduce el error de Nest", async () => {

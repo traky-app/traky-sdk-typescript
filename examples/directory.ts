@@ -11,13 +11,13 @@ if (!apiKey) {
 
 const traky = new Traky({ apiKey });
 
+// true o ausente: el API crea el contacto SHIPPER con el nombre verificado.
 const customerBody: CustomerCreate = {
-  accountType: "PERSONAL",
+  identityType: "PASSPORT",
+  identityNumber: "A1234567",
   firstName: "Ana",
   lastName: "Paz",
   email: "ana@example.com",
-  // false: solo el cliente. true o ausente: también un contacto SHIPPER.
-  createContact: false,
 };
 
 const customer = await traky.customers.create(customerBody);
@@ -26,7 +26,7 @@ const updated = await traky.customers.update(customer.id, { city: "Quito" });
 const contactBody: ContactWrite = {
   accountType: "PERSONAL",
   firstName: "Luis",
-  types: ["SHIPPER"],
+  types: ["CONSIGNEE"],
   clientId: updated.id,
 };
 
@@ -35,6 +35,3 @@ await traky.contacts.update(contact.id, { types: ["SHIPPER", "CONSIGNEE"] });
 
 const page = await traky.contacts.list({ clientId: updated.id, types: ["SHIPPER"] });
 console.log(page.data.map((row) => row.types));
-
-await traky.contacts.delete(contact.id);
-await traky.customers.delete(updated.id);

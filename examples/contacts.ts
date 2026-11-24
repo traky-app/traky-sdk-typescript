@@ -2,8 +2,10 @@ import { traky } from "./traky.js";
 import type { ContactWrite, CustomerCreate } from "../src/index.js";
 
 const customerBody: CustomerCreate = {
-  accountType: "PERSONAL",
+  identityType: "PASSPORT",
+  identityNumber: "A1234567",
   firstName: "Ana",
+  lastName: "Paz",
   email: `ana-${Date.now()}@example.com`,
   createContact: false,
 };
@@ -25,5 +27,3 @@ console.log(page.data.map((row) => row.types));
 
 const loaded = await traky.contacts.retrieve(created.id);
 await traky.contacts.update(loaded.id, { types: ["SHIPPER", "CONSIGNEE"] });
-await traky.contacts.delete(loaded.id);
-await traky.customers.delete(customer.id);

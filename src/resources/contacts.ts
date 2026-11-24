@@ -4,7 +4,6 @@ import type {
   Contact,
   ContactListParams,
   ContactWrite,
-  DeletedResource,
   DirectoryPage,
 } from "../types.js";
 
@@ -83,18 +82,6 @@ export class ContactsResource {
     signal?: AbortSignal,
   ): Promise<Contact> {
     return this.http.patch<Contact>(contactPath(id), body, signal);
-  }
-
-  /**
-   * Elimina un contacto.
-   *
-   * Scope: `contacts:write` o `organization:read`.
-   *
-   * @param id - Id del contacto.
-   * @param signal - Cancela la petición.
-   */
-  delete(id: string, signal?: AbortSignal): Promise<DeletedResource> {
-    return this.http.delete<DeletedResource>(contactPath(id), signal);
   }
 }
 

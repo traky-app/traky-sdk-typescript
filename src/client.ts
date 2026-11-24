@@ -30,7 +30,7 @@ export class Traky {
   readonly packages: PackagesResource;
   /** Recibos: grupos de paquetes con el mismo código. */
   readonly receipts: ReceiptsResource;
-  /** Clientes con portal. El alta usa `CustomerCreate` (`createContact`). */
+  /** Clientes con portal. Alta y actualización. Sin borrado. */
   readonly customers: CustomersResource;
   /** Contactos comerciales. El rol se envía en `ContactWrite.types`. */
   readonly contacts: ContactsResource;

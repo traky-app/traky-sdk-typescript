@@ -59,25 +59,23 @@ await traky.receipts.update(receipt.id, { warehouseComments: "Frágil" });
 await traky.receipts.delete(receipt.id);
 
 const customerBody: CustomerCreate = {
-  accountType: "PERSONAL",
-  firstName: "Ana",
+  identityType: "CEDULA",
+  identityNumber: "1710034065",
   email: "ana@example.com",
-  createContact: false,
 };
 const customer = await traky.customers.create(customerBody);
-await traky.customers.update(customer.id, { lastName: "Paz" });
+await traky.customers.update(customer.id, { city: "Quito" });
 
 const contactBody: ContactWrite = {
   firstName: "Luis",
-  types: ["SHIPPER"],
+  types: ["CONSIGNEE"],
   clientId: customer.id,
 };
 const contact = await traky.contacts.create(contactBody);
 await traky.contacts.update(contact.id, { types: ["SHIPPER", "CONSIGNEE"] });
-await traky.contacts.delete(contact.id);
 ```
 
-El ejemplo de cada recurso está en `examples/`: `organization.ts`, `statuses.ts`, `offices.ts`, `warehouses.ts`, `packages.ts`, `receipts.ts`, `customers.ts` y `contacts.ts`. `examples/directory.ts` crea y borra un cliente y un contacto juntos. Al pasar el cursor sobre `create`, `update`, `list`, `retrieve` o `delete` el editor muestra el cuerpo que hay que enviar.
+El ejemplo de cada recurso está en `examples/`: `organization.ts`, `statuses.ts`, `offices.ts`, `warehouses.ts`, `packages.ts`, `receipts.ts`, `customers.ts` y `contacts.ts`. `examples/directory.ts` crea un cliente y un contacto juntos. Al pasar el cursor sobre `create`, `update`, `list` o `retrieve` el editor muestra el cuerpo que hay que enviar. En clientes y contactos no hay `delete`.
 
 | Método | Endpoint | Scope |
 | --- | --- | --- |
@@ -94,9 +92,9 @@ El ejemplo de cada recurso está en `examples/`: `organization.ts`, `statuses.ts
 | `receipts.list()` / `receipts.retrieve()` | `GET /org-api/v1/receipts` | `packages:read` |
 | `receipts.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/receipts` | `packages:write` o `organization:read` |
 | `customers.list()` / `customers.retrieve()` | `GET /org-api/v1/customers` | `customers:read` o `organization:read` |
-| `customers.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/customers` | `customers:write` o `organization:read` |
+| `customers.create()` / `update()` | `POST`, `PATCH /org-api/v1/customers` | `customers:write` o `organization:read` |
 | `contacts.list()` / `contacts.retrieve()` | `GET /org-api/v1/contacts` | `contacts:read` o `organization:read` |
-| `contacts.create()` / `update()` / `delete()` | `POST`, `PATCH`, `DELETE /org-api/v1/contacts` | `contacts:write` o `organization:read` |
+| `contacts.create()` / `update()` | `POST`, `PATCH /org-api/v1/contacts` | `contacts:write` o `organization:read` |
 
 `statuses.list()` sin categoría devuelve los estados de paquete, envío, otro y flota. `statuses.create` recibe `StatusCreate`: `label`, `description`, `category` (`package`, `other` o `fleet`) e `icon`. `shipment` ya no se puede crear. `statuses.update` recibe `StatusWrite`. `warehouseId` o `locationId` en `null` quita ese vínculo. Las claves ya creadas con `organization:read` pueden usar este CRUD. Una clave solo con `packages:read` puede listar, no escribir. El id de un estado de paquete es el `itemStatusId` de un paquete o un recibo. `offices.list()` devuelve sucursales y bodegas. Cada fila trae `type`: `office` atiende al cliente y `warehouse` es bodega. `offices.list({ type: "office" })` deja solo sucursales; `type: "warehouse"` (o `warehouses.list()`) deja solo bodegas. El id de una sucursal es el `locationId` de un paquete; el de una bodega, el `warehouseId`.
 
@@ -106,7 +104,7 @@ El ejemplo de cada recurso está en `examples/`: `organization.ts`, `statuses.ts
 
 Un recibo es el grupo de paquetes que comparten código. `receipts.create` recibe `ReceiptCreate` y la lista `packages` (P1, P2…). `externalReceiptCode` (`WHR…`) usa el warehouse del proveedor en lugar de la secuencia WR. El `id` del recibo es el id del primer paquete. Puedes pasar el id de cualquier pieza a `retrieve`, `update` y `delete`. `receipts.update` aplica la cabecera a todas las piezas; `packages` dentro del cuerpo cambia una pieza que ya existe. `receipts.delete` elimina el recibo completo. Las claves ya creadas con `organization:read` pueden usar este CRUD. Una clave solo con `packages:read` puede listar, no escribir.
 
-`customers.create` recibe `CustomerCreate`. Cuenta `PERSONAL` pide `firstName` y cuenta `BUSINESS` pide `companyName`. No se envía `types`; el API lo guarda como `CLIENT`. `createContact: true` (o ausente) crea además un contacto `SHIPPER` con los mismos datos; `false` crea solo el cliente. `customers.update` recibe `CustomerWrite`. `contacts` es el contacto comercial y el cuerpo es `ContactWrite`. Su `types` sale de `CONTACT_TYPES` (`SHIPPER`, `CONSIGNEE`, `CARRIER`, `FORWARDER`, `NOTIFY_PARTY`, `BROKER`, `IMPORTER`, `EXPORTER`, `AGENT`, `WAREHOUSE`). Si no se envía, queda `SHIPPER`. `clientId` lo vincula al cliente. Las claves ya creadas con `organization:read` pueden usar este CRUD. La respuesta no incluye el id de autenticación ni la contraseña del portal.
+`customers.create` recibe `CustomerCreate`. No se envía `types`; el API lo guarda como `CLIENT`. Con cédula (`CEDULA` o `EC_CEDULA`) solo se envía `identityNumber` de 10 dígitos: el API consulta el registro y guarda nombre y apellido. Con RUC (`RUC` o `EC_RUC`) solo se envía el número de 13 dígitos y el API guarda la razón social. No envíes `firstName`, `lastName` ni `companyName` en esos dos casos. Con pasaporte se envían `identityNumber`, `firstName` y `lastName`, porque ese documento no se consulta. Sin esos documentos, cuenta `PERSONAL` pide `firstName` y cuenta `BUSINESS` pide `companyName`. `createContact: true` (o ausente) crea además un contacto `SHIPPER` con los datos ya verificados; `false` crea solo el cliente. `customers.update` recibe `CustomerWrite`. El SDK no borra clientes ni contactos. `contacts` es el contacto comercial y el cuerpo es `ContactWrite`. Su `types` sale de `CONTACT_TYPES` (`SHIPPER`, `CONSIGNEE`, `CARRIER`, `FORWARDER`, `NOTIFY_PARTY`, `BROKER`, `IMPORTER`, `EXPORTER`, `AGENT`, `WAREHOUSE`). Si no se envía, queda `SHIPPER`. `clientId` lo vincula al cliente. Las claves ya creadas con `organization:read` pueden usar este alta y esta actualización. La respuesta no incluye el id de autenticación ni la contraseña del portal.
 
 La API también acepta la key en el header `X-Api-Key`; este SDK envía `Authorization: Bearer`.
 

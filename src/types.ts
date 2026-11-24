@@ -473,7 +473,7 @@ export type DeletedResource = {
 
 /**
  * Cliente de la organización.
- * `GET/POST /org-api/v1/customers` y `GET/PATCH/DELETE /org-api/v1/customers/:id`.
+ * `GET/POST /org-api/v1/customers` y `GET/PATCH /org-api/v1/customers/:id`.
  */
 export type Customer = {
   id: string;
@@ -534,11 +534,21 @@ export type CustomerWrite = {
 
 /**
  * Cuerpo de `customers.create`.
- * `createContact` decide si el API también crea el contacto SHIPPER.
+ *
+ * Cédula (`CEDULA`, `EC_CEDULA`): solo `identityNumber` de 10 dígitos.
+ * No envíes `firstName`, `lastName` ni `companyName`. El API consulta y guarda el nombre.
+ *
+ * RUC (`RUC`, `EC_RUC`): solo `identityNumber` de 13 dígitos.
+ * El API consulta y guarda la razón social.
+ *
+ * Pasaporte (`PASSPORT`): envía `identityNumber`, `firstName` y `lastName`.
+ * No hay consulta automática.
+ *
+ * Sin esos documentos, cuenta `PERSONAL` pide `firstName` y `BUSINESS` pide `companyName`.
  */
 export type CustomerCreate = CustomerWrite & {
   /**
-   * `true` o ausente: crea un contacto `SHIPPER` con los mismos datos del cliente.
+   * `true` o ausente: crea un contacto `SHIPPER` con los datos ya verificados.
    * `false`: crea solo el cliente.
    */
   createContact?: boolean;
@@ -557,7 +567,7 @@ export type CustomerListParams = {
 
 /**
  * Contacto comercial, sin portal.
- * `GET/POST /org-api/v1/contacts` y `GET/PATCH/DELETE /org-api/v1/contacts/:id`.
+ * `GET/POST /org-api/v1/contacts` y `GET/PATCH /org-api/v1/contacts/:id`.
  */
 export type Contact = {
   id: string;
